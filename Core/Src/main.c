@@ -21,7 +21,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 
+#include "lcdDisplay.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,7 +44,19 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+lcd_t Lcd;
 
+uint8_t arrow1[8] = { 0x00, 0x04, 0x06, 0x1F, 0x1F, 0x06, 0x04, 0x00 };
+// 0 0 0 0 0 0 0 0
+// 0 0 0 0 0 1 0 0
+// 0 0 0 0 0 1 1 0
+// 0 0 0 1 1 1 1 1
+// 0 0 0 1 1 1 1 1
+// 0 0 0 0 0 1 1 0
+// 0 0 0 0 0 1 0 0
+// 0 0 0 0 0 0 0 0
+
+uint8_t arrow2[8] = { 0x00, 0x04, 0x0C, 0x1F, 0x1F, 0x0C, 0x04, 0x00 };
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -54,7 +68,35 @@ static void MX_GPIO_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void __lcd_init(){
+	Lcd.columns = 16;
+	Lcd.rows = 2;
+	Lcd.font = LCD_FONT_5X8;
+	Lcd.interface = LCD_INTERFACE_4BIT;
+	Lcd.backlightGpio.GPIO = (uint32_t)LCD_BL_GPIO_Port;
+	Lcd.backlightGpio.pin = LCD_BL_Pin;
 
+	Lcd.gpios[LCD_RS].GPIO = (uint32_t)LCD_RS_GPIO_Port;
+	Lcd.gpios[LCD_RS].pin = LCD_RS_Pin;
+	Lcd.gpios[LCD_E].GPIO = (uint32_t)LCD_E_GPIO_Port;
+	Lcd.gpios[LCD_E].pin = LCD_E_Pin;
+	Lcd.gpios[LCD_D4].GPIO = (uint32_t)LCD_D4_GPIO_Port;
+	Lcd.gpios[LCD_D4].pin = LCD_D4_Pin;
+	Lcd.gpios[LCD_D5].GPIO = (uint32_t)LCD_D5_GPIO_Port;
+	Lcd.gpios[LCD_D5].pin = LCD_D5_Pin;
+	Lcd.gpios[LCD_D6].GPIO = (uint32_t)LCD_D6_GPIO_Port;
+	Lcd.gpios[LCD_D6].pin = LCD_D6_Pin;
+	Lcd.gpios[LCD_D7].GPIO = (uint32_t)LCD_D7_GPIO_Port;
+	Lcd.gpios[LCD_D7].pin = LCD_D7_Pin;
+
+	lcd_init(&Lcd);
+	lcd_backlight_set(&Lcd, LCD_BACKLIGHT_ON);
+}
+
+void __lcd_creat_custom_char(){
+	lcd_create_custom_char(&Lcd, LCD_CUSTOM_1, arrow1);
+	lcd_create_custom_char(&Lcd, LCD_CUSTOM_2, arrow2);
+}
 /* USER CODE END 0 */
 
 /**
@@ -64,7 +106,8 @@ static void MX_GPIO_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	int Cnt;
+	char Text[17];
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -80,19 +123,29 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  HAL_Delay(250);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
+  __lcd_init();
+  __lcd_creat_custom_char();
 
+  lcd_send_char_pos(&Lcd, LCD_CUSTOM_1, 0, 0);
+  lcd_send_string_pos(&Lcd, "Hello World", 0, 1);
+  lcd_send_char(&Lcd, LCD_CUSTOM_2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  Cnt = 0;
   while (1)
   {
+	  sprintf(Text, "Contador: %d", Cnt);
+	  lcd_send_string_pos(&Lcd, Text, 1, 0);
+	  Cnt++;
+	  HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
