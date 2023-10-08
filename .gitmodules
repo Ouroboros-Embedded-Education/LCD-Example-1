@@ -1,0 +1,3 @@
+[submodule "/libs/lcd"]
+	path = /libs/lcd
+	url = git@github.com:Pablo-Jean/lcd-display.git
